@@ -1,0 +1,13 @@
+{
+    "name": "pixel-client-uno",
+    "version": "0.1.0",
+    "description": "Arduino Uno library used to communicate with a pixel controller board over the I2C bus",
+    "keywords": "pixel",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/rozindisplay/pixel-client-uno.git"
+    },
+    "frameworks": "arduino",
+    "platforms": "atmelavr"
+}
