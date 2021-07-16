@@ -114,8 +114,14 @@ void PixelClientReader::opSetRequestType(PixelClientProcessor* processor) {
 }
 
 void PixelClientReader::rqPing(PixelClientProcessor* processor) {
-    processor->ping();
+    processor->requestPing();
     writeByte(REQUEST_PING, Wire);
+}
+
+void PixelClientReader::rqError(PixelClientProcessor* processor) {
+    int errorCode = processor->requestError();
+    writeByte(REQUEST_ERROR, Wire);
+    writeInt(errorCode, Wire);
 }
 
 PixelClientLimit PixelClientReader::nextLimit() {

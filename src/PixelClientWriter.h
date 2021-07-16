@@ -13,6 +13,7 @@ public:
     void setAngle(unsigned char address, unsigned char pixle, double angle);
     void addAngle(unsigned char address, unsigned char pixle, double angle);
     bool requestPing(unsigned char address);
+    int requestError(unsigned char address);
 };
 
 #endif

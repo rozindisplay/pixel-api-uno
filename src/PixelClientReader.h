@@ -22,6 +22,7 @@ private:
     void opSetRequestType(PixelClientProcessor*);
 
     void rqPing(PixelClientProcessor*);
+    void rqError(PixelClientProcessor*);
 
     PixelClientLimit nextLimit();
 };

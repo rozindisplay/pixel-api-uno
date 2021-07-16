@@ -88,19 +88,45 @@ bool PixelClientWriter::requestPing(unsigned char address) {
     Wire.endTransmission();
 
     uint8_t bytes = Wire.requestFrom(address, (uint8_t)1);
-    unsigned char byte;
+    unsigned char type;
     for(uint8_t i=0; i<bytes; i++) {
-        byte = readByte(Wire);
+        type = readByte(Wire);
     }
     
     if(1 != bytes) {
         // error: wrong number of bytes
         return false;
     }
-    if(byte!=REQUEST_PING) {
-        // error: wrong value returned
+    if(type!=REQUEST_PING) {
+        // error: wrong request type returned
         return false;
     }
 
     return true;
+}
+
+int PixelClientWriter::requestError(unsigned char address) {
+    Wire.beginTransmission(address);
+    writeByte(OP_REQUEST_TYPE, Wire);
+    writeByte(REQUEST_ERROR, Wire);
+    Wire.endTransmission();
+
+    // 1 byte = request type
+    // 2 bytes = error code (int)
+    uint8_t requestBytes = 3;
+    uint8_t bytes = Wire.requestFrom(address, requestBytes);
+    if(requestBytes != bytes) {
+        // error: wrong number of bytes
+        return -1;
+    }
+
+    unsigned char type = readByte(Wire);
+    int code = readInt(Wire);
+    
+    if(type!=REQUEST_ERROR) {
+        // error: wrong request type returned
+        return -1;
+    }
+
+    return code;
 }

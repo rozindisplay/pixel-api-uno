@@ -13,7 +13,8 @@ public:
     virtual void onSetAngle(unsigned char opcode, unsigned char pixle, double angle) = 0;
     virtual void onAddAngle(unsigned char opcode, unsigned char pixle, double angle) = 0;
     virtual void onSetRequestType(unsigned char opcode, unsigned char requestType) = 0;
-    virtual void ping() = 0;
+    virtual void requestPing() = 0;
+    virtual int requestError() = 0;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define PIXEL_CLIENT_CONSTS
 
 #define REQUEST_PING   0
+#define REQUEST_ERROR  1
 
 #define OP_HOME 0
 #define OP_SET_LIMITS_AND_HOME 1
