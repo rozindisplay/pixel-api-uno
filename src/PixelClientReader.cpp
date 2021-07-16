@@ -43,6 +43,21 @@ void PixelClientReader::next(PixelClientProcessor* processor) {
     }
 }
 
+void PixelClientReader::nextRequest(PixelClientProcessor* processor) {
+    switch (requestType) {
+    case REQUEST_PING:
+        rqPing(processor);
+        break;
+    default:
+        // error: unknown request type
+        break;
+    }
+}
+
+unsigned char PixelClientReader::getRequestType() {
+    return requestType;
+}
+
 void PixelClientReader::opHome(PixelClientProcessor* processor) {
     processor->onHome(OP_HOME);
 }
@@ -93,7 +108,14 @@ void PixelClientReader::opAddAngle(PixelClientProcessor* processor) {
 
 void PixelClientReader::opSetRequestType(PixelClientProcessor* processor) {
     const unsigned char type = readByte(Wire);
+    this->requestType = type;
+
     processor->onSetRequestType(OP_REQUEST_TYPE, type);
+}
+
+void PixelClientReader::rqPing(PixelClientProcessor* processor) {
+    processor->ping();
+    writeByte(REQUEST_PING, Wire);
 }
 
 PixelClientLimit PixelClientReader::nextLimit() {

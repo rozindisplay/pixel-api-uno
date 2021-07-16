@@ -7,7 +7,11 @@ class PixelClientReader {
 public:
     bool hasNext();
     void next(PixelClientProcessor*);
+    void nextRequest(PixelClientProcessor*);
+    unsigned char getRequestType();
 private:
+    unsigned char requestType;
+
     void opHome(PixelClientProcessor*);
     void opSetLimits(PixelClientProcessor*);
     void opSetLimitsAndHome(PixelClientProcessor*);
@@ -16,6 +20,8 @@ private:
     void opSetAngle(PixelClientProcessor*);
     void opAddAngle(PixelClientProcessor*);
     void opSetRequestType(PixelClientProcessor*);
+
+    void rqPing(PixelClientProcessor*);
 
     PixelClientLimit nextLimit();
 };
