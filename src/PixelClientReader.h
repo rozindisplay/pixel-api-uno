@@ -15,6 +15,7 @@ private:
     void opAddSteps(PixelClientProcessor*);
     void opSetAngle(PixelClientProcessor*);
     void opAddAngle(PixelClientProcessor*);
+    void opSetRequestType(PixelClientProcessor*);
 
     PixelClientLimit nextLimit();
 };

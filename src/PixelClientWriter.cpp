@@ -3,12 +3,12 @@
 #include "PixelClientConsts.h"
 #include <utils/StreamUtils.h>
 
-void PixelClientWriter::home(int address) {
+void PixelClientWriter::home(unsigned char address) {
     Wire.beginTransmission(address);
     writeByte(OP_HOME, Wire); 
     Wire.endTransmission();
 }
-void PixelClientWriter::setLimitsAndHome(int address, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4) {
+void PixelClientWriter::setLimitsAndHome(unsigned char address, const PixelClientLimit& limitP1, const PixelClientLimit& limitP2, const PixelClientLimit& limitP3, const PixelClientLimit& limitP4) {
     Wire.beginTransmission(address);
     
     writeByte(OP_SET_LIMITS_AND_HOME, Wire);
@@ -28,7 +28,7 @@ void PixelClientWriter::setLimitsAndHome(int address, const PixelClientLimit& li
     Wire.endTransmission();
 }
 
-void PixelClientWriter::setLimit(int address, char pixle, const PixelClientLimit& limit) {
+void PixelClientWriter::setLimit(unsigned char address, unsigned char pixle, const PixelClientLimit& limit) {
     Wire.beginTransmission(address);
     
     writeByte(OP_SET_LIMITS, Wire);
@@ -41,7 +41,7 @@ void PixelClientWriter::setLimit(int address, char pixle, const PixelClientLimit
     Wire.endTransmission();
 }
 
-void PixelClientWriter::setSteps(int address, char pixle, int steps) {
+void PixelClientWriter::setSteps(unsigned char address, unsigned char pixle, int steps) {
     Wire.beginTransmission(address);
     
     writeByte(OP_SET_STEPS, Wire);
@@ -51,7 +51,7 @@ void PixelClientWriter::setSteps(int address, char pixle, int steps) {
     Wire.endTransmission();
 }
 
-void PixelClientWriter::addSteps(int address, char pixle, int steps) {
+void PixelClientWriter::addSteps(unsigned char address, unsigned char pixle, int steps) {
     Wire.beginTransmission(address);
 
     writeByte(OP_ADD_STEPS, Wire);
@@ -61,7 +61,7 @@ void PixelClientWriter::addSteps(int address, char pixle, int steps) {
     Wire.endTransmission();
 }
 
-void PixelClientWriter::setAngle(int address, char pixle, double angle) {
+void PixelClientWriter::setAngle(unsigned char address, unsigned char pixle, double angle) {
     Wire.beginTransmission(address);
     
     writeByte(OP_SET_ANGLE, Wire);
@@ -71,7 +71,7 @@ void PixelClientWriter::setAngle(int address, char pixle, double angle) {
     Wire.endTransmission();
 }
 
-void PixelClientWriter::addAngle(int address, char pixle, double angle) {
+void PixelClientWriter::addAngle(unsigned char address, unsigned char pixle, double angle) {
     Wire.beginTransmission(address);
     
     writeByte(OP_ADD_ANGLE, Wire);
@@ -79,4 +79,28 @@ void PixelClientWriter::addAngle(int address, char pixle, double angle) {
     writeDouble(angle, Wire);
 
     Wire.endTransmission();
+}
+
+bool PixelClientWriter::requestPing(unsigned char address) {
+    Wire.beginTransmission(address);
+    writeByte(OP_REQUEST_TYPE, Wire);
+    writeByte(REQUEST_PING, Wire);
+    Wire.endTransmission();
+
+    uint8_t bytes = Wire.requestFrom(address, (uint8_t)1);
+    unsigned char byte;
+    for(uint8_t i=0; i<bytes; i++) {
+        byte = readByte(Wire);
+    }
+    
+    if(1 != bytes) {
+        // error: wrong number of bytes
+        return false;
+    }
+    if(byte!=REQUEST_PING) {
+        // error: wrong value returned
+        return false;
+    }
+
+    return true;
 }

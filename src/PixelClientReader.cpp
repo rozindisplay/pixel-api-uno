@@ -13,7 +13,7 @@ void PixelClientReader::next(PixelClientProcessor* processor) {
         return;
     }
 
-    char opcode = Wire.read();
+    unsigned char opcode = Wire.read();
 
     switch(opcode) {
     case OP_HOME:
@@ -37,6 +37,9 @@ void PixelClientReader::next(PixelClientProcessor* processor) {
     case OP_ADD_ANGLE:
         opAddAngle(processor);
         break;
+    case OP_REQUEST_TYPE:
+        opSetRequestType(processor);
+        break;
     }
 }
 
@@ -45,7 +48,7 @@ void PixelClientReader::opHome(PixelClientProcessor* processor) {
 }
 
 void PixelClientReader::opSetLimits(PixelClientProcessor* processor) {
-    const char pixle = readByte(Wire);
+    const unsigned char pixle = readByte(Wire);
     const PixelClientLimit limit = nextLimit();
 
     processor->onSetLimit(OP_SET_LIMITS, pixle, limit);
@@ -61,31 +64,36 @@ void PixelClientReader::opSetLimitsAndHome(PixelClientProcessor* processor) {
 }
 
 void PixelClientReader::opSetSteps(PixelClientProcessor* processor) {
-    const char pixle = readByte(Wire);
+    const unsigned char pixle = readByte(Wire);
     const int steps = readInt(Wire);
 
     processor->onSetSteps(OP_SET_STEPS, pixle, steps);
 }
 
 void PixelClientReader::opAddSteps(PixelClientProcessor* processor) {
-    const char pixle = readByte(Wire);
+    const unsigned char pixle = readByte(Wire);
     const int steps = readInt(Wire);
 
     processor->onAddSteps(OP_ADD_STEPS, pixle, steps);
 }
 
 void PixelClientReader::opSetAngle(PixelClientProcessor* processor) {
-    const char pixle = readByte(Wire);
+    const unsigned char pixle = readByte(Wire);
     const double angle = readDouble(Wire);
 
     processor->onSetAngle(OP_SET_ANGLE, pixle, angle);
 }
 
 void PixelClientReader::opAddAngle(PixelClientProcessor* processor) {
-    const char pixle = readByte(Wire);
+    const unsigned char pixle = readByte(Wire);
     const double angle = readDouble(Wire);
 
     processor->onAddAngle(OP_ADD_ANGLE, pixle, angle);
+}
+
+void PixelClientReader::opSetRequestType(PixelClientProcessor* processor) {
+    const unsigned char type = readByte(Wire);
+    processor->onSetRequestType(OP_REQUEST_TYPE, type);
 }
 
 PixelClientLimit PixelClientReader::nextLimit() {
