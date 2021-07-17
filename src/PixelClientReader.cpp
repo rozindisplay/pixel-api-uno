@@ -48,6 +48,8 @@ void PixelClientReader::nextRequest(PixelClientProcessor* processor) {
     case REQUEST_PING:
         rqPing(processor);
         break;
+    case REQUEST_ERROR:
+        rqError(processor);
     default:
         // error: unknown request type
         break;
