@@ -1,6 +1,8 @@
 #ifndef PIXEL_CLIENT_STATUS
 #define PIXEL_CLIENT_STATUS
 
+#include <pix/PixLimit.h>
+
 class PixStatus {
 public:
     const bool moving;
