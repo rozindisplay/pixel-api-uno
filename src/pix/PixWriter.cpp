@@ -29,6 +29,12 @@ void PixWriter::home(unsigned char address) {
     Wire.endTransmission();
 }
 
+void PixWriter::clearErrorCode(unsigned char address) {
+    Wire.beginTransmission(address);
+    writeByte(OP_CLEAR_ERROR_CODE, Wire); 
+    Wire.endTransmission();
+}
+
 void PixWriter::setLimit(unsigned char address, unsigned char pixle, const PixLimit& limit) {
     Wire.beginTransmission(address);
     
