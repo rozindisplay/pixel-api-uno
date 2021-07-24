@@ -1,36 +1,35 @@
 #ifndef PIXEL_CLIENT_READER
 #define PIXEL_CLIENT_READER
 
-#include <pix/PixLimit.h>
 #include <pix/PixProcessor.h>
 #include <pix/PixConsts.h>
 
 class PixReader {
 public:
     bool hasNext();
-    void next(PixProcessor*);
-    void nextRequest(PixProcessor*);
+    int next(PixProcessor*);
+    int nextRequest(PixProcessor*);
     unsigned char getRequestType();
 private:
     unsigned char requestType = REQUEST_PING;
 
-    void opInit(PixProcessor*);
-    void opHome(PixProcessor*);
-    void opClearErrorCode(PixProcessor*);
-    void opSetLimit(PixProcessor*);
-    void opSetSteps(PixProcessor*);
-    void opAddSteps(PixProcessor*);
-    void opSetAngle(PixProcessor*);
-    void opAddAngle(PixProcessor*);
-    void opSetRequestType(PixProcessor*);
+    int opInit(PixProcessor*);
+    int opHome(PixProcessor*);
+    int opClearErrorCode(PixProcessor*);
+    int opSetLimit(PixProcessor*);
+    int opSetSteps(PixProcessor*);
+    int opAddSteps(PixProcessor*);
+    int opSetAngle(PixProcessor*);
+    int opAddAngle(PixProcessor*);
+    int opSetRequestType(PixProcessor*);
 
-    void rqPing(PixProcessor*);
-    void rqErrorCode(PixProcessor*);
-    void rqMovingCount(PixProcessor*);
-    void rqStatus(PixProcessor*);
+    int rqPing(PixProcessor*);
+    int rqErrorCode(PixProcessor*);
+    int rqMovingCount(PixProcessor*);
+    int rqStatus(PixProcessor*);
 
-    PixLimit nextLimit();
-    void writeLimit(const PixLimit&);
+    int nextLimit(Limit&);
+    int writeLimit(const Limit&);
 };
 
 #endif

@@ -1,26 +1,27 @@
 #ifndef PIXEL_CLIENT_WRITER
 #define PIXEL_CLIENT_WRITER
 
-#include <pix/PixLimit.h>
-#include <pix/PixStatusSet.h>
+#include <pix/PixModel.h>
 
 class PixWriter {
 public:
-    void init(unsigned char address, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3, const PixLimit& limitP4);
-    void home(unsigned char address);
-    void clearErrorCode(unsigned char address);
-    void setLimit(unsigned char address, unsigned char pixle, const PixLimit& limit);
-    void setSteps(unsigned char address, unsigned char pixle, int steps);
-    void addSteps(unsigned char address, unsigned char pixle, int steps);
-    void setAngle(unsigned char address, unsigned char pixle, double angle);
-    void addAngle(unsigned char address, unsigned char pixle, double angle);
-    bool requestPing(unsigned char address);
+    int init(unsigned char address, const Limit& limitP1, const Limit& limitP2, const Limit& limitP3, const Limit& limitP4);
+    int home(unsigned char address);
+    int clearErrorCode(unsigned char address);
+    int setLimit(unsigned char address, unsigned char pixle, const Limit& limit);
+    int setSteps(unsigned char address, unsigned char pixle, int steps);
+    int addSteps(unsigned char address, unsigned char pixle, int steps);
+    int setAngle(unsigned char address, unsigned char pixle, double angle);
+    int addAngle(unsigned char address, unsigned char pixle, double angle);
+    int requestPing(unsigned char address);
     int requestErrorCode(unsigned char address);
-    unsigned char requestMovingCount(unsigned char address);
-    const PixStatusSet requestStatus(unsigned char address);
+    int requestMovingCount(unsigned char address, unsigned char& movingCount);
+    int requestStatus(unsigned char address, NodeStatus& status);
 private:
-    PixLimit readLimit();
-    PixStatus readStatus();
+    int readLimit(Limit&);
+    int readStatus(PixelStatus&);
+    int sendRequestType(unsigned char address, unsigned char type);
+    int toPixCode(int transmissionCode);
 };
 
 #endif

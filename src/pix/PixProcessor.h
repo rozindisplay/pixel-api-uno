@@ -1,17 +1,14 @@
 #ifndef PIXEL_CLIENT_PROCESSOR
 #define PIXEL_CLIENT_PROCESSOR
 
-#include <pix/PixAngles.h>
-#include <pix/PixLimit.h>
-#include <pix/PixSteps.h>
-#include <pix/PixStatusSet.h>
+#include <pix/PixModel.h>
 
 class PixProcessor {
 public:
     /**
      * Sets the soft limits for all of the pixels and runs the calibration process
      */
-    virtual void onInit(const PixLimit& limitP0, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3) = 0;
+    virtual void onInit(const Limit& limitP0, const Limit& limitP1, const Limit& limitP2, const Limit& limitP3) = 0;
     
     /**
      * Runs the calibration process
@@ -26,7 +23,7 @@ public:
     /**
      * Sets the soft limits for a given pixel
      */
-    virtual void onSetLimit(unsigned char pixle, const PixLimit& limit) = 0;
+    virtual void onSetLimit(unsigned char pixle, const Limit& limit) = 0;
     
     /**
      * Sets a pixel position using steps as the unit
@@ -66,7 +63,7 @@ public:
     /**
      * A request for the node's complete status
      */
-    virtual const PixStatusSet requestStatus() = 0;
+    virtual const NodeStatus requestStatus() = 0;
 };
 
 #endif
