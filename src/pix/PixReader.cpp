@@ -206,11 +206,11 @@ int PixReader::rqErrorCode(PixProcessor* processor) {
     int errorCode = processor->requestErrorCode();
     
     // --== Headers ==-- //
-    // 1 byte
+    // 1 byte :  Type
     err = writeByte(REQUEST_ERROR_CODE, Wire);
     if(0!=err) {return err;}
 
-    // 1 byte
+    // 1 byte : Pixel Arg
     err = writeByte(requestPixel, Wire);
     if(0!=err) {return err;}
     
@@ -230,11 +230,11 @@ int PixReader::rqMovingCount(PixProcessor* processor) {
     unsigned char count = processor->requestMovingCount();
     
     // --== Headers ==-- //
-    // 1 byte
+    // 1 byte : Type
     err = writeByte(REQUEST_MOVING_COUNT, Wire);
     if(0!=err) {return err;}
 
-    // 1 byte
+    // 1 byte : Pixel Arg
     err = writeByte(requestPixel, Wire);
     if(0!=err) {return err;}
     
@@ -254,11 +254,11 @@ int PixReader::rqStatus(PixProcessor* processor) {
     PixStatus status = processor->requestStatus(requestPixel);
     
     // --== Headers ==-- //
-    // 1 byte
+    // 1 byte : Type
     err = writeByte(REQUEST_STATUS, Wire);
     if(0!=err) {return err;}
 
-    // 1 byte
+    // 1 byte : Pixel Arg
     err = writeByte(requestPixel, Wire);
     if(0!=err) {return err;}
     

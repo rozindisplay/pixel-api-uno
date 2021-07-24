@@ -305,6 +305,11 @@ int PixWriter::initRequest(unsigned char address, unsigned char type, unsigned c
         return err;
     }
 
+    if(responsePixel!=pixel) {
+        // error: wrong arg
+        return ERROR_REQUEST_WRONG_PIXEL;
+    }
+
     return 0;
 }
 
