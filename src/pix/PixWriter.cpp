@@ -166,12 +166,12 @@ int PixWriter::addAngle(unsigned char address, unsigned char pixle, double angle
 }
 
 int PixWriter::requestPing(unsigned char address) {
-    return initRequest(address, REQUEST_MOVING_COUNT, -1, 0);
+    return initRequest(address, REQUEST_PING, -1, 0);
 }
 
 int PixWriter::requestErrorCode(unsigned char address, int& errorCode) {
     // 2 bytes (int)
-    int err = initRequest(address, REQUEST_MOVING_COUNT, -1, 2);
+    int err = initRequest(address, REQUEST_ERROR_CODE, -1, 2);
     if(err!=0) {
         return err;
     }
@@ -210,7 +210,7 @@ int PixWriter::requestStatus(unsigned char address, unsigned char pixel, PixStat
     // 4 bytes = current angle for each pixel
     // 4 bytes = limit settings for each pixel
     // total = 13
-    int err = initRequest(address, REQUEST_MOVING_COUNT, pixel, 13);
+    int err = initRequest(address, REQUEST_STATUS, pixel, 13);
 
     // 1 byte
     char movingCh;

@@ -195,6 +195,8 @@ int PixReader::rqPing(PixProcessor* processor) {
     err = writeByte(requestPixel, Wire);
     if(0!=err) {return err;}
 
+    // total = 2 bytes
+
     return 0;
 }
 
@@ -219,7 +221,7 @@ int PixReader::rqErrorCode(PixProcessor* processor) {
     err = writeInt(errorCode, Wire);
     if(0!=err) {return err;}
 
-    // total = 3 bytes
+    // total = 4 bytes
     
     return 0;
 }
@@ -243,7 +245,7 @@ int PixReader::rqMovingCount(PixProcessor* processor) {
     err = writeByte(count, Wire);
     if(0!=err) {return err;}
 
-    // total = 2 bytes
+    // total = 3 bytes
 
     return 0;
 }
@@ -282,6 +284,8 @@ int PixReader::rqStatus(PixProcessor* processor) {
     // 4 bytes
     err = writeLimit(status.limit);
     if(0!=err) {return err;}
+
+    // total = 15 bytes
 
     return 0;
 }
