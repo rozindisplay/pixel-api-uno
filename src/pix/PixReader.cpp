@@ -172,6 +172,8 @@ int PixReader::opSetRequestType(PixProcessor* processor) {
     if(0!=err) {return err;}
 
     this->requestType = type;
+
+    return 0;
 }
 
 int PixReader::rqPing(PixProcessor* processor) {
@@ -184,6 +186,8 @@ int PixReader::rqPing(PixProcessor* processor) {
     if(0!=err) {return err;}
 
     // total = 1 bytes
+
+    return 0;
 }
 
 int PixReader::rqErrorCode(PixProcessor* processor) {
@@ -263,6 +267,8 @@ int PixReader::rqStatus(PixProcessor* processor) {
     }
 
     // total = 55 bytes
+
+    return 0;
 }
 
 int PixReader::nextLimit(Limit& limit) {
@@ -274,8 +280,12 @@ int PixReader::nextLimit(Limit& limit) {
 
     int upper;
     err = readInt(Wire, upper);
+    if(err!=0) {
+        return err;
+    }
     
     limit = Limit(lower, upper);
+    return 0;
 }
 
 int PixReader::writeLimit(const Limit& limit) {
@@ -289,6 +299,7 @@ int PixReader::writeLimit(const Limit& limit) {
         return err;
     }
 
-    return 0;
     // total = 4 bytes
+
+    return 0;
 }
