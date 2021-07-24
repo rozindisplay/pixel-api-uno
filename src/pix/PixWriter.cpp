@@ -271,11 +271,11 @@ int PixWriter::readLimit(PixLimit& limit) {
     return 0;
 }
 
-int PixWriter::initRequest(unsigned char address, unsigned char type, unsigned char pixel, uint8_t bytes) {
+int PixWriter::initRequest(unsigned char address, unsigned char type, unsigned char pixel, unsigned char bytes) {
     // 1 byte request type
     // 1 byte pixel argument
     // total = 2 + requested bytes
-    int totalBytes = bytes + 2;
+    uint8_t totalBytes = bytes + 2;
     
     int err;    
 
