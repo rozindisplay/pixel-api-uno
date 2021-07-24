@@ -1,27 +1,13 @@
 #include <pix/PixModel.h>
 
-NodeStatus::NodeStatus() {
+PixStatus::PixStatus() {
 }
 
-NodeStatus::NodeStatus(int error, PixelStatus ps0, PixelStatus ps1, PixelStatus ps2, PixelStatus ps3): error(error), pixels({ps0, ps1, ps2, ps3}) {
+PixStatus::PixStatus(bool moving, int target, int steps, double angle, PixLimit limit): moving(moving), target(target), steps(steps), angle(angle), limit(limit) {
 }
 
-const int NodeStatus::size() {
-    return 4;
+PixLimit::PixLimit() {
 }
 
-PixelStatus& NodeStatus::operator[](int i) {
-    return pixels[i];
-}
-
-PixelStatus::PixelStatus() {
-}
-
-PixelStatus::PixelStatus(bool moving, int target, int steps, double angle, Limit limit): moving(moving), target(target), steps(steps), angle(angle), limit(limit) {
-}
-
-Limit::Limit() {
-}
-
-Limit::Limit(int lower, int upper): lower(lower), upper(upper) {
+PixLimit::PixLimit(int lower, int upper): lower(lower), upper(upper) {
 }

@@ -8,7 +8,7 @@ public:
     /**
      * Sets the soft limits for all of the pixels and runs the calibration process
      */
-    virtual void onInit(const Limit& limitP0, const Limit& limitP1, const Limit& limitP2, const Limit& limitP3) = 0;
+    virtual void onInit(const PixLimit& limitP0, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3) = 0;
     
     /**
      * Runs the calibration process
@@ -23,7 +23,7 @@ public:
     /**
      * Sets the soft limits for a given pixel
      */
-    virtual void onSetLimit(unsigned char pixle, const Limit& limit) = 0;
+    virtual void onSetLimit(unsigned char pixle, const PixLimit& limit) = 0;
     
     /**
      * Sets a pixel position using steps as the unit
@@ -61,9 +61,9 @@ public:
     virtual unsigned char requestMovingCount() = 0;
 
     /**
-     * A request for the node's complete status
+     * A request for a pixel's complete status
      */
-    virtual const NodeStatus requestStatus() = 0;
+    virtual const PixStatus requestStatus(unsigned char pixle) = 0;
 };
 
 #endif

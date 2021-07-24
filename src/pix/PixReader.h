@@ -12,6 +12,7 @@ public:
     unsigned char getRequestType();
 private:
     unsigned char requestType = REQUEST_PING;
+    unsigned char requestPixel = 0;
 
     int opInit(PixProcessor*);
     int opHome(PixProcessor*);
@@ -28,8 +29,8 @@ private:
     int rqMovingCount(PixProcessor*);
     int rqStatus(PixProcessor*);
 
-    int nextLimit(Limit&);
-    int writeLimit(const Limit&);
+    int nextLimit(PixLimit&);
+    int writeLimit(const PixLimit&);
 };
 
 #endif

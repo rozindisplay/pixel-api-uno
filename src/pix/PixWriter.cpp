@@ -1,9 +1,10 @@
+#include "Arduino.h"
 #include "Wire.h"
 #include <pix/PixWriter.h>
 #include <pix/PixConsts.h>
 #include <pix/utils/StreamUtils.h>
 
-int PixWriter::init(unsigned char address, const Limit& limitP0, const Limit& limitP1, const Limit& limitP2, const Limit& limitP3) {
+int PixWriter::init(unsigned char address, const PixLimit& limitP0, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3) {
     int err;
     Wire.beginTransmission(address);
     
@@ -77,7 +78,7 @@ int PixWriter::clearErrorCode(unsigned char address) {
     return toPixCode(Wire.endTransmission());
 }
 
-int PixWriter::setLimit(unsigned char address, unsigned char pixle, const Limit& limit) {
+int PixWriter::setLimit(unsigned char address, unsigned char pixle, const PixLimit& limit) {
     int err;
 
     Wire.beginTransmission(address);
@@ -165,56 +166,14 @@ int PixWriter::addAngle(unsigned char address, unsigned char pixle, double angle
 }
 
 int PixWriter::requestPing(unsigned char address) {
-    int err = sendRequestType(address, REQUEST_PING);
-    if(err!=0) {
-        return err;
-    }
-
-    uint8_t bytes = Wire.requestFrom(address, (uint8_t)1);
-    
-    if(1 != bytes) {
-        // error: wrong number of bytes
-        return ERROR_REQUEST_WRONG_NUMBER_OF_BYTES;
-    }
-
-    unsigned char type;
-    err = readByte(Wire, type);
-    if(err!=0) {
-        return err;
-    }
-
-    if(type!=REQUEST_PING) {
-        // error: wrong request type returned
-        return ERROR_REQUEST_WRONG_TYPE;
-    }
-
-    return 0;
+    return initRequest(address, REQUEST_MOVING_COUNT, -1, 0);
 }
 
 int PixWriter::requestErrorCode(unsigned char address, int& errorCode) {
-    int err = sendRequestType(address, REQUEST_ERROR_CODE);
+    // 2 bytes (int)
+    int err = initRequest(address, REQUEST_MOVING_COUNT, -1, 2);
     if(err!=0) {
         return err;
-    }
-
-    // 1 byte = request type
-    // 2 bytes = error code (int)
-    uint8_t requestBytes = 3;
-    uint8_t bytes = Wire.requestFrom(address, requestBytes);
-    if(requestBytes != bytes) {
-        // error: wrong number of bytes
-        return ERROR_REQUEST_WRONG_NUMBER_OF_BYTES;
-    }
-
-    unsigned char type;
-    err = readByte(Wire, type);
-    if(err!=0) {
-        return err;
-    }
-    
-    if(type!=REQUEST_ERROR_CODE) {
-        // error: wrong request type returned
-        return ERROR_REQUEST_WRONG_TYPE;
     }
 
     int code;
@@ -228,29 +187,10 @@ int PixWriter::requestErrorCode(unsigned char address, int& errorCode) {
 }
 
 int PixWriter::requestMovingCount(unsigned char address, unsigned char& movingCount) {
-    int err = sendRequestType(address, REQUEST_MOVING_COUNT);
-    if(err!=0) {
-        return err;
-    }
-
-    // 1 byte = request type
     // 1 byte = moving count
-    uint8_t requestBytes = 2;
-    uint8_t bytes = Wire.requestFrom(address, requestBytes);
-    if(requestBytes != bytes) {
-        // error: wrong number of bytes
-        return ERROR_REQUEST_WRONG_NUMBER_OF_BYTES;
-    }
-
-    unsigned char type;
-    err = readByte(Wire, type);
+    int err = initRequest(address, REQUEST_MOVING_COUNT, -1, 1);
     if(err!=0) {
         return err;
-    }
-
-    if(type!=REQUEST_MOVING_COUNT) {
-        // error: wrong request type returned
-        return ERROR_REQUEST_WRONG_TYPE;
     }
 
     unsigned char count;
@@ -263,64 +203,56 @@ int PixWriter::requestMovingCount(unsigned char address, unsigned char& movingCo
     return 0;
 }
 
-int PixWriter::requestStatus(unsigned char address, NodeStatus& status) {
-    int err = sendRequestType(address, REQUEST_STATUS);
+int PixWriter::requestStatus(unsigned char address, unsigned char pixel, PixStatus& status) {
+    // 1 byte = moving indicator for each pixel
+    // 2 bytes = target position for each pixel
+    // 2 bytes = current position for each pixel
+    // 4 bytes = current angle for each pixel
+    // 4 bytes = limit settings for each pixel
+    // total = 13
+    int err = initRequest(address, REQUEST_MOVING_COUNT, pixel, 13);
+
+    // 1 byte
+    char movingCh;
+    err = readByte(Wire, movingCh);
+    if(err!=0) {
+        return err;
+    }
+    bool moving = movingCh > 0;
+
+    // 2 bytes
+    int target;
+    err = readInt(Wire, target);
     if(err!=0) {
         return err;
     }
 
-    // 1 byte = request type
-    // 2 byte = error code
-    // 4 * 1 byte = moving indicator for each pixel (4bytes)
-    // 4 * 2 bytes = target position for each pixel (8bytes)
-    // 4 * 2 bytes = current position for each pixel (8bytes)
-    // 4 * 4 bytes = current angle for each pixel (16bytes)
-    // 4 * 4 bytes = limit settings for each pixel (16bytes)
-    // total = 55
-
-    uint8_t requestBytes = 55;
-    uint8_t bytes = Wire.requestFrom(address, requestBytes);
-    if(requestBytes != bytes) {
-        // error: wrong number of bytes
-        return ERROR_REQUEST_WRONG_NUMBER_OF_BYTES;
+    // 2 bytes
+    int steps;
+    err = readInt(Wire, steps);
+    if(err!=0) {
+        return err;
     }
-
-    unsigned char type;
-    err = readByte(Wire, type);
+    
+    // 4 bytes
+    double angle;
+    err = readDouble(Wire, angle);
     if(err!=0) {
         return err;
     }
 
-    if(type!=REQUEST_STATUS) {
-        // error: wrong request type returned
-        return ERROR_REQUEST_WRONG_TYPE;
-    }
-
-    int errcode;
-    err = readInt(Wire, errcode);
-
-    status.error = errcode;
-    err = readStatus(status[0]);
-    if(err!=0) {
-        return err;
-    }
-    err = readStatus(status[1]);
-    if(err!=0) {
-        return err;
-    }
-    err = readStatus(status[2]);
-    if(err!=0) {
-        return err;
-    }
-    err = readStatus(status[3]);
+    // 4 bytes
+    PixLimit limit;
+    err = readLimit(limit);
     if(err!=0) {
         return err;
     }
 
+    status = PixStatus(moving, target, steps, angle, limit);
     return 0;
 }
 
-int PixWriter::readLimit(Limit& limit) {
+int PixWriter::readLimit(PixLimit& limit) {
     int err;
 
     int lower;
@@ -335,49 +267,48 @@ int PixWriter::readLimit(Limit& limit) {
         return err;
     }
     
-    limit = Limit(lower, upper);
+    limit = PixLimit(lower, upper);
     return 0;
 }
 
-int PixWriter::readStatus(PixelStatus& status) {
-    int err;
+int PixWriter::initRequest(unsigned char address, unsigned char type, unsigned char pixel, uint8_t bytes) {
+    // 1 byte request type
+    // 1 byte pixel argument
+    // total = 2 + requested bytes
+    int totalBytes = bytes + 2;
     
-    char movingCh;
-    err = readByte(Wire, movingCh);
-    if(err!=0) {
-        return err;
-    }
-    bool moving = movingCh >0;
+    int err;    
 
-    int target;
-    err = readInt(Wire, target);
-    if(err!=0) {
-        return err;
-    }
-
-    int steps;
-    err = readInt(Wire, steps);
-    if(err!=0) {
-        return err;
-    }
+    sendRequestType(address, type, pixel);
     
-    double angle;
-    err = readDouble(Wire, angle);
+    uint8_t responseBytes = Wire.requestFrom(address, totalBytes);
+
+    if(responseBytes != totalBytes) {
+        // error: wrong number of bytes
+        return ERROR_REQUEST_WRONG_NUMBER_OF_BYTES;
+    }
+
+    unsigned char responseType;
+    err = readByte(Wire, responseType);
     if(err!=0) {
         return err;
     }
 
-    Limit limit;
-    err = readLimit(limit);
+    if(responseType!=type) {
+        // error: wrong request type returned
+        return ERROR_REQUEST_WRONG_TYPE;
+    }
+
+    unsigned char responsePixel;
+    err = readByte(Wire, responsePixel);
     if(err!=0) {
         return err;
     }
 
-    status = PixelStatus(moving, target, steps, angle, limit);
     return 0;
 }
 
-int PixWriter::sendRequestType(unsigned char address, unsigned char type) {
+int PixWriter::sendRequestType(unsigned char address, unsigned char type, unsigned char pixel) {
     int err;
     
     Wire.beginTransmission(address);
@@ -388,6 +319,11 @@ int PixWriter::sendRequestType(unsigned char address, unsigned char type) {
     }
     
     err = writeByte(type, Wire);
+    if(err!=0) {
+        return err;
+    }
+
+    err = writeByte(pixel, Wire);
     if(err!=0) {
         return err;
     }
