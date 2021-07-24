@@ -188,7 +188,7 @@ int PixReader::rqPing(PixProcessor* processor) {
 
     // --== Headers ==-- //
     // 1 byte
-    err = writeByte(REQUEST_STATUS, Wire);
+    err = writeByte(REQUEST_PING, Wire);
     if(0!=err) {return err;}
 
     // 1 byte
@@ -207,7 +207,7 @@ int PixReader::rqErrorCode(PixProcessor* processor) {
     
     // --== Headers ==-- //
     // 1 byte
-    err = writeByte(REQUEST_STATUS, Wire);
+    err = writeByte(REQUEST_ERROR_CODE, Wire);
     if(0!=err) {return err;}
 
     // 1 byte
@@ -231,7 +231,7 @@ int PixReader::rqMovingCount(PixProcessor* processor) {
     
     // --== Headers ==-- //
     // 1 byte
-    err = writeByte(REQUEST_STATUS, Wire);
+    err = writeByte(REQUEST_MOVING_COUNT, Wire);
     if(0!=err) {return err;}
 
     // 1 byte
