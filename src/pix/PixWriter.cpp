@@ -374,6 +374,7 @@ int PixWriter::readStatus(PixelStatus& status) {
     }
 
     status = PixelStatus(moving, target, steps, angle, limit);
+    return 0;
 }
 
 int PixWriter::sendRequestType(unsigned char address, unsigned char type) {
