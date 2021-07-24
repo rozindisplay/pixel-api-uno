@@ -191,7 +191,7 @@ int PixWriter::requestPing(unsigned char address) {
     return 0;
 }
 
-int PixWriter::requestErrorCode(unsigned char address) {
+int PixWriter::requestErrorCode(unsigned char address, int& errorCode) {
     int err = sendRequestType(address, REQUEST_ERROR_CODE);
     if(err!=0) {
         return err;
@@ -223,7 +223,8 @@ int PixWriter::requestErrorCode(unsigned char address) {
         return err;
     }
 
-    return code;
+    errorCode = code;
+    return 0;
 }
 
 int PixWriter::requestMovingCount(unsigned char address, unsigned char& movingCount) {

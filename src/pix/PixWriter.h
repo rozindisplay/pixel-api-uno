@@ -14,7 +14,7 @@ public:
     int setAngle(unsigned char address, unsigned char pixle, double angle);
     int addAngle(unsigned char address, unsigned char pixle, double angle);
     int requestPing(unsigned char address);
-    int requestErrorCode(unsigned char address);
+    int requestErrorCode(unsigned char address, int& errorCode);
     int requestMovingCount(unsigned char address, unsigned char& movingCount);
     int requestStatus(unsigned char address, NodeStatus& status);
 private:
