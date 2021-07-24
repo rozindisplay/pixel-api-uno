@@ -262,7 +262,7 @@ int PixWriter::readLimit(PixLimit& limit) {
     }
 
     int upper;
-    err = readInt(Wire, err);
+    err = readInt(Wire, upper);
     if(err!=0) {
         return err;
     }
