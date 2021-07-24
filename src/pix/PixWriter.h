@@ -20,7 +20,7 @@ public:
 private:
     int readLimit(PixLimit&);
     int sendRequestType(unsigned char address, unsigned char type, unsigned char pixel);
-    int initRequest(unsigned char address, unsigned char type, unsigned char pixel, uint8_t bytes);
+    int initRequest(unsigned char address, unsigned char type, unsigned char pixel, unsigned char bytes);
     int toPixCode(int transmissionCode);
 };
 
