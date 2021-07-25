@@ -15,10 +15,10 @@ int PixReader::next(PixProcessor* processor) {
     unsigned char opcode = Wire.read();
 
     switch(opcode) {
-    case OP_INIT:
-        return opInit(processor);
     case OP_HOME:
         return opHome(processor);
+    case OP_HOME_ALL:
+        return opHomeAll(processor);
     case OP_CLEAR_ERROR_CODE:
         return opClearErrorCode(processor);
     case OP_SET_LIMIT:
@@ -42,12 +42,26 @@ int PixReader::nextRequest(PixProcessor* processor) {
     switch (requestType) {
     case REQUEST_PING:
         return rqPing(processor);
-    case REQUEST_ERROR_CODE:
-        return rqErrorCode(processor);
+    case REQUEST_PIXELS:
+        return rqPixels(processor);
     case REQUEST_MOVING_COUNT:
         return rqMovingCount(processor);
+    case REQUEST_IS_MOVING:
+        return rqIsMoving(processor);
+    case REQUEST_TARGET_STEPS:
+        return rqTargetSteps(processor);
+    case REQUEST_STEPS:
+        return rqSteps(processor);
+    case REQUEST_TARGET_ANGLE:
+        return rqTargetAngle(processor);
+    case REQUEST_ANGLE:
+        return rqAngle(processor);
+    case REQUEST_LIMIT:
+        return rqLimit(processor);
     case REQUEST_STATUS:
         return rqStatus(processor);
+    case REQUEST_ERROR_CODE:
+        return rqErrorCode(processor);
     default:
         return ERROR_READER_UNKNOWN_REQUEST;
     }
@@ -57,30 +71,19 @@ unsigned char PixReader::getRequestType() {
     return requestType;
 }
 
-int PixReader::opInit(PixProcessor* processor) {
-    int err;
-    PixLimit limitP0;
-    err = nextLimit(limitP0);
-    if(0!=err) {return err;}
-    
-    PixLimit limitP1;
-    err = nextLimit(limitP1);
-    if(0!=err) {return err;}
-    
-    PixLimit limitP2;
-    err = nextLimit(limitP2);
-    if(0!=err) {return err;}
-    
-    PixLimit limitP3;
-    err = nextLimit(limitP3);
-    if(0!=err) {return err;}
-
-    processor->onInit(limitP0, limitP1, limitP2, limitP3);
+int PixReader::opHome(PixProcessor* processor) {
+    processor->onHome();
     return 0;
 }
 
-int PixReader::opHome(PixProcessor* processor) {
-    processor->onHome();
+int PixReader::opHomeAll(PixProcessor* processor) {
+    int err;
+    
+    char pixle;
+    err = readByte(Wire, pixle);
+    if(0!=err) {return err;}
+
+    processor->onHome(pixle);
     return 0;
 }
 
@@ -186,66 +189,163 @@ int PixReader::rqPing(PixProcessor* processor) {
     
     int err;
 
-    // --== Headers ==-- //
-    // 1 byte
-    err = writeByte(REQUEST_PING, Wire);
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_PING);
     if(0!=err) {return err;}
 
-    // 1 byte
-    err = writeByte(requestPixel, Wire);
-    if(0!=err) {return err;}
-
-    // total = 2 bytes
+    // total = 0 bytes + header
 
     return 0;
 }
 
-int PixReader::rqErrorCode(PixProcessor* processor) {
-    // process error
-    int err;
-    
-    // request error
-    int errorCode = processor->requestErrorCode();
-    
-    // --== Headers ==-- //
-    // 1 byte :  Type
-    err = writeByte(REQUEST_ERROR_CODE, Wire);
-    if(0!=err) {return err;}
+int PixReader::rqPixels(PixProcessor* processor) {
+    unsigned char count = processor->requestPixels();
 
-    // 1 byte : Pixel Arg
-    err = writeByte(requestPixel, Wire);
+    int err;
+
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_PIXELS);
     if(0!=err) {return err;}
     
     // --== Body ==-- //
-    // write 2 bytes
-    err = writeInt(errorCode, Wire);
+    // 1 byte
+    err = writeByte(count, Wire);
     if(0!=err) {return err;}
 
-    // total = 4 bytes
+    // total = 1 byte + header
+
+    return 0;
+}
+
+int PixReader::rqIsMoving(PixProcessor* processor) {
+    int err;
+
+    bool isMoving = processor->requestIsMoving(requestPixel);
     
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_IS_MOVING);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // 1 byte
+    err = writeByte(isMoving ? 1 : 0, Wire);
+    if(0!=err) {return err;}
+
+    // total = 1 byte + header
+
     return 0;
 }
 
 int PixReader::rqMovingCount(PixProcessor* processor) {
     int err;
 
-    unsigned char count = processor->requestMovingCount();
+    unsigned char count = processor->requestMoving();
     
-    // --== Headers ==-- //
-    // 1 byte : Type
-    err = writeByte(REQUEST_MOVING_COUNT, Wire);
-    if(0!=err) {return err;}
-
-    // 1 byte : Pixel Arg
-    err = writeByte(requestPixel, Wire);
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_MOVING_COUNT);
     if(0!=err) {return err;}
     
     // --== Body ==-- //
-    // write 1 byte
+    // 1 byte
     err = writeByte(count, Wire);
     if(0!=err) {return err;}
 
-    // total = 3 bytes
+    // total = 1 byte + header
+
+    return 0;
+}
+
+int PixReader::rqTargetSteps(PixProcessor* processor) {
+    int err;
+
+    int steps = processor->requestTargetSteps(requestPixel);
+    
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_TARGET_STEPS);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // 2 bytes
+    err = writeInt(steps, Wire);
+    if(0!=err) {return err;}
+
+    // total = 2 bytes + header
+
+    return 0;
+}
+
+int PixReader::rqSteps(PixProcessor* processor) {
+    int err;
+
+    int steps = processor->requestSteps(requestPixel);
+    
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_STEPS);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // 2 bytes
+    err = writeInt(steps, Wire);
+    if(0!=err) {return err;}
+
+    // total = 2 bytes + header
+
+    return 0;
+}
+
+int PixReader::rqTargetAngle(PixProcessor* processor) {
+    int err;
+
+    double angle = processor->requestTargetAngle(requestPixel);
+    
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_TARGET_ANGLE);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // 4 bytes
+    err = writeDouble(angle, Wire);
+    if(0!=err) {return err;}
+
+    // total = 4 bytes + header
+
+    return 0;
+}
+
+int PixReader::rqAngle(PixProcessor* processor) {
+    int err;
+
+    double angle = processor->requestAngle(requestPixel);
+    
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_ANGLE);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // 4 bytes
+    err = writeDouble(angle, Wire);
+    if(0!=err) {return err;}
+
+    // total = 4 bytes + header
+
+    return 0;
+}
+
+int PixReader::rqLimit(PixProcessor* processor) {
+    int err;
+
+    PixLimit limit = processor->requestLimit(requestPixel);
+    
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_ANGLE);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // 4 bytes
+    err = writeLimit(limit);
+    if(0!=err) {return err;}
+
+    // total = 4 bytes + header
 
     return 0;
 }
@@ -255,13 +355,8 @@ int PixReader::rqStatus(PixProcessor* processor) {
 
     PixStatus status = processor->requestStatus(requestPixel);
     
-    // --== Headers ==-- //
-    // 1 byte : Type
-    err = writeByte(REQUEST_STATUS, Wire);
-    if(0!=err) {return err;}
-
-    // 1 byte : Pixel Arg
-    err = writeByte(requestPixel, Wire);
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_STATUS);
     if(0!=err) {return err;}
     
     // --== Body ==-- //
@@ -285,40 +380,78 @@ int PixReader::rqStatus(PixProcessor* processor) {
     err = writeLimit(status.limit);
     if(0!=err) {return err;}
 
-    // total = 15 bytes
+    // total = 13 bytes + header
 
     return 0;
 }
 
+int PixReader::rqErrorCode(PixProcessor* processor) {
+    // process error
+    int err;
+    
+    // request error
+    int errorCode = processor->requestErrorCode();
+    
+    // --== Header ==-- //
+    err = writeHeader(REQUEST_ERROR_CODE);
+    if(0!=err) {return err;}
+    
+    // --== Body ==-- //
+    // write 2 bytes
+    err = writeInt(errorCode, Wire);
+    if(0!=err) {return err;}
+
+    // total = 2 bytes + header
+    
+    return 0;
+}
+
 int PixReader::nextLimit(PixLimit& limit) {
+    
+    // 2 bytes
     int lower;
     int err = readInt(Wire, lower);
-    if(err!=0) {
-        return err;
-    }
+    if(err!=0) { return err; }
 
+    // 2 bytes
     int upper;
     err = readInt(Wire, upper);
-    if(err!=0) {
-        return err;
-    }
+    if(err!=0) { return err; }
     
+    // total = 4 bytes
+
     limit = PixLimit(lower, upper);
     return 0;
 }
 
 int PixReader::writeLimit(const PixLimit& limit) {
+    
+    // 2 bytes
     int err = writeInt(limit.lower, Wire);
-    if(err!=0) {
-        return err;
-    }
+    if(err!=0) { return err; }
 
+    // 2 bytes
     err = writeInt(limit.upper, Wire);
-    if(err!=0) {
-        return err;
-    }
+    if(err!=0) { return err; }
 
     // total = 4 bytes
+
+    return 0;
+}
+
+int PixReader::writeHeader(unsigned char rqCode) {
+    int err;
+    
+    // --== Headers ==-- //
+    // 1 byte : Type
+    err = writeByte(rqCode, Wire);
+    if(0!=err) {return err;}
+
+    // 1 byte : Pixel Arg
+    err = writeByte(requestPixel, Wire);
+    if(0!=err) {return err;}
+
+    // total = 2 bytes
 
     return 0;
 }

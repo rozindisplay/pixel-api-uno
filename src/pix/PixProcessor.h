@@ -5,10 +5,6 @@
 
 class PixProcessor {
 public:
-    /**
-     * Sets the soft limits for all of the pixels and runs the calibration process
-     */
-    virtual void onInit(const PixLimit& limitP0, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3) = 0;
     
     /**
      * Runs the calibration process
@@ -16,9 +12,9 @@ public:
     virtual void onHome() = 0;
 
     /**
-     * Resets and clears the error code
+     * Runs the calibration process on the given pixel
      */
-    virtual void onClearErrorCode() = 0;
+    virtual void onHome(unsigned char pixle) = 0;
 
     /**
      * Sets the soft limits for a given pixel
@@ -44,6 +40,11 @@ public:
      * Adds the given angle (in degrees) to the current position
      */
     virtual void onAddAngle(unsigned char pixle, double angle) = 0;
+
+    /**
+     * Resets and clears any error codes on the board
+     */
+    virtual void onClearErrorCode() = 0;
     
     /**
      * Notifies that a ping request was made
@@ -51,19 +52,54 @@ public:
     virtual void requestPing() = 0;
 
     /**
-     * A requests for the current error code
+     * Requests the number of pixels controlled by the board
      */
-    virtual int requestErrorCode() = 0;
+    virtual unsigned char requestPixels() = 0;
 
     /**
-     * A request for the number of moving pixels
+     * A request for the number of pixels currently moving on the board
      */
-    virtual unsigned char requestMovingCount() = 0;
+    virtual unsigned char requestMoving() = 0;
 
     /**
-     * A request for a pixel's complete status
+     * A request to see if a given pixel is currently moving
+     */
+    virtual bool requestIsMoving(unsigned char pixle) = 0;
+
+    /**
+     * Requests a pixel's target position in steps from zero (the destination position)
+     */
+    virtual int requestTargetSteps(unsigned char pixle) = 0;
+
+    /**
+     * Requests a pixel's current position in steps from zero (the position in transit)
+     */
+    virtual int requestSteps(unsigned char pixle) = 0;
+
+    /**
+     * Requests a pixel's current angle in degrees from zero (the destination angle)
+     */
+    virtual double requestTargetAngle(unsigned char pixle) = 0;
+    
+    /**
+     * Requests a pixel's current angle in degrees from zero (the angle in transit)
+     */
+    virtual double requestAngle(unsigned char pixle) = 0;
+
+    /**
+     * Requests a pixel's current limit settings
+     */
+    virtual const PixLimit requestLimit(unsigned char pixle) = 0;
+
+    /**
+     * A request for a pixel's complete status (for debugging)
      */
     virtual const PixStatus requestStatus(unsigned char pixle) = 0;
+
+    /**
+     * A requests for the current error code (for debugging)
+     */
+    virtual int requestErrorCode() = 0;
 };
 
 #endif

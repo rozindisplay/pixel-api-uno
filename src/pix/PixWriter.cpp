@@ -4,58 +4,6 @@
 #include <pix/PixConsts.h>
 #include <pix/utils/StreamUtils.h>
 
-int PixWriter::init(unsigned char address, const PixLimit& limitP0, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3) {
-    int err;
-    Wire.beginTransmission(address);
-    
-    err = writeByte(OP_INIT, Wire);
-    if(err!=0) {
-        return err;
-    }
-    
-    // limit 0
-    err = writeInt(limitP0.lower, Wire);
-    if(err!=0) {
-        return err;
-    }
-    err = writeInt(limitP0.upper, Wire);
-    if(err!=0) {
-        return err;
-    }
-
-    // limit 1
-    err = writeInt(limitP1.lower, Wire);
-    if(err!=0) {
-        return err;
-    }
-    err = writeInt(limitP1.upper, Wire);
-    if(err!=0) {
-        return err;
-    }
-
-    // limit 2
-    err = writeInt(limitP2.lower, Wire);
-    if(err!=0) {
-        return err;
-    }
-    err = writeInt(limitP2.upper, Wire);
-    if(err!=0) {
-        return err;
-    }
-
-    // limit 3
-    err = writeInt(limitP3.lower, Wire);
-    if(err!=0) {
-        return err;
-    }
-    err = writeInt(limitP3.upper, Wire);
-    if(err!=0) {
-        return err;
-    }
-
-    return toPixCode(Wire.endTransmission());
-}
-
 int PixWriter::home(unsigned char address) {
     Wire.beginTransmission(address);
     
@@ -63,6 +11,18 @@ int PixWriter::home(unsigned char address) {
     if(err!=0) {
         return err;
     }
+    
+    return toPixCode(Wire.endTransmission());
+}
+
+int PixWriter::home(unsigned char address, unsigned char pixel) {
+    Wire.beginTransmission(address);
+    
+    int err = writeByte(OP_HOME_ALL, Wire);
+    if(err!=0) { return err; }
+
+    err = writeByte(pixel, Wire);
+    if(err!=0) {return err;}
     
     return toPixCode(Wire.endTransmission());
 }
@@ -78,7 +38,7 @@ int PixWriter::clearErrorCode(unsigned char address) {
     return toPixCode(Wire.endTransmission());
 }
 
-int PixWriter::setLimit(unsigned char address, unsigned char pixle, const PixLimit& limit) {
+int PixWriter::setLimit(unsigned char address, unsigned char pixel, const PixLimit& limit) {
     int err;
 
     Wire.beginTransmission(address);
@@ -86,7 +46,7 @@ int PixWriter::setLimit(unsigned char address, unsigned char pixle, const PixLim
     err = writeByte(OP_SET_LIMIT, Wire);
     if(err!=0) {return err;}
     
-    err = writeByte(pixle, Wire);
+    err = writeByte(pixel, Wire);
     if(err!=0) {return err;}
 
     err = writeInt(limit.lower, Wire);
@@ -98,7 +58,7 @@ int PixWriter::setLimit(unsigned char address, unsigned char pixle, const PixLim
     return toPixCode(Wire.endTransmission());
 }
 
-int PixWriter::setSteps(unsigned char address, unsigned char pixle, int steps) {
+int PixWriter::setSteps(unsigned char address, unsigned char pixel, int steps) {
     int err;
     
     Wire.beginTransmission(address);
@@ -106,7 +66,7 @@ int PixWriter::setSteps(unsigned char address, unsigned char pixle, int steps) {
     err = writeByte(OP_SET_STEPS, Wire);
     if(err!=0) {return err;}
     
-    err = writeByte(pixle, Wire);
+    err = writeByte(pixel, Wire);
     if(err!=0) {return err;}
     
     err = writeInt(steps, Wire);
@@ -115,14 +75,14 @@ int PixWriter::setSteps(unsigned char address, unsigned char pixle, int steps) {
     return toPixCode(Wire.endTransmission());
 }
 
-int PixWriter::addSteps(unsigned char address, unsigned char pixle, int steps) {
+int PixWriter::addSteps(unsigned char address, unsigned char pixel, int steps) {
     int err;
     Wire.beginTransmission(address);
 
     err = writeByte(OP_ADD_STEPS, Wire);
     if(err!=0) {return err;}
 
-    err = writeByte(pixle, Wire);
+    err = writeByte(pixel, Wire);
     if(err!=0) {return err;}
 
     err = writeInt(steps, Wire);
@@ -131,14 +91,14 @@ int PixWriter::addSteps(unsigned char address, unsigned char pixle, int steps) {
     return toPixCode(Wire.endTransmission());
 }
 
-int PixWriter::setAngle(unsigned char address, unsigned char pixle, double angle) {
+int PixWriter::setAngle(unsigned char address, unsigned char pixel, double angle) {
     int err;
     Wire.beginTransmission(address);
     
     err = writeByte(OP_SET_ANGLE, Wire);
     if(err!=0) {return err;}
 
-    err = writeByte(pixle, Wire);
+    err = writeByte(pixel, Wire);
     if(err!=0) {return err;}
     
     err = writeDouble(angle, Wire);
@@ -147,14 +107,14 @@ int PixWriter::setAngle(unsigned char address, unsigned char pixle, double angle
     return toPixCode(Wire.endTransmission());
 }
 
-int PixWriter::addAngle(unsigned char address, unsigned char pixle, double angle) {
+int PixWriter::addAngle(unsigned char address, unsigned char pixel, double angle) {
     int err;
     Wire.beginTransmission(address);
     
     err = writeByte(OP_ADD_ANGLE, Wire);
     if(err!=0) {return err;}
     
-    err = writeByte(pixle, Wire);
+    err = writeByte(pixel, Wire);
     if(err!=0) {return err;}
 
     err = writeDouble(angle, Wire);
@@ -169,37 +129,98 @@ int PixWriter::requestPing(unsigned char address) {
     return initRequest(address, REQUEST_PING, -1, 0);
 }
 
-int PixWriter::requestErrorCode(unsigned char address, int& errorCode) {
-    // 2 bytes (int)
-    int err = initRequest(address, REQUEST_ERROR_CODE, -1, 2);
-    if(err!=0) {
-        return err;
-    }
+int PixWriter::requestPixel(unsigned char address, unsigned char& count) {
+    // 1 byte = pixel count
+    int err = initRequest(address, REQUEST_PIXELS, -1, 1);
+    if(err!=0) { return err; }
 
-    int code;
-    err = readInt(Wire,code);
-    if(err!=0) {
-        return err;
-    }
+    unsigned char pixCount;
+    err = readByte(Wire, pixCount);
+    if(err!=0) { return err; }
 
-    errorCode = code;
+    count = pixCount;
+
     return 0;
 }
 
-int PixWriter::requestMovingCount(unsigned char address, unsigned char& movingCount) {
+int PixWriter::requestMoving(unsigned char address, unsigned char& count) {
     // 1 byte = moving count
     int err = initRequest(address, REQUEST_MOVING_COUNT, -1, 1);
-    if(err!=0) {
-        return err;
-    }
+    if(err!=0) { return err; }
 
-    unsigned char count;
-    err = readByte(Wire, count);
-    if(err!=0) {
-        return err;
-    }
+    unsigned char movCount;
+    err = readByte(Wire, movCount);
+    if(err!=0) { return err; }
 
-    movingCount = count;
+    count = movCount;
+    return 0;
+}
+
+int PixWriter::requestIsMoving(unsigned char address, unsigned char pixel, bool &isMoving) {
+    // 1 byte = moving count
+    int err = initRequest(address, REQUEST_IS_MOVING, pixel, 1);
+    if(err!=0) { return err; }
+
+    unsigned char moving;
+    err = readByte(Wire, moving);
+    if(err!=0) { return err; }
+
+    isMoving = moving > 0;
+    return 0;
+}
+
+int PixWriter::requestTargetSteps(unsigned char address, unsigned char pixel, int &steps) {
+    // 2 byte = steps
+    int err = initRequest(address, REQUEST_TARGET_STEPS, pixel, 2);
+    if(err!=0) { return err; }
+
+    err = readInt(Wire, steps);
+    if(err!=0) { return err; }
+
+    return 0;
+}
+
+int PixWriter::requestSteps(unsigned char address, unsigned char pixel, int &steps) {
+    // 2 byte = steps
+    int err = initRequest(address, REQUEST_STEPS, pixel, 2);
+    if(err!=0) { return err; }
+
+    err = readInt(Wire, steps);
+    if(err!=0) { return err; }
+
+    return 0;
+}
+
+int PixWriter::requestTargetAngle(unsigned char address, unsigned char pixel, double &angle) {
+    // 4 bytes = angle
+    int err = initRequest(address, REQUEST_TARGET_ANGLE, pixel, 4);
+    if(err!=0) { return err; }
+
+    err = readDouble(Wire, angle);
+    if(err!=0) { return err; }
+
+    return 0;
+}
+
+int PixWriter::requestAngle(unsigned char address, unsigned char pixel, double &angle) {
+    // 4 bytes = angle
+    int err = initRequest(address, REQUEST_ANGLE, pixel, 4);
+    if(err!=0) { return err; }
+
+    err = readDouble(Wire, angle);
+    if(err!=0) { return err; }
+
+    return 0;
+}
+
+int PixWriter::requestLimit(unsigned char address, unsigned char pixel, PixLimit &limit) {
+    // 4 bytes = limit
+    int err = initRequest(address, REQUEST_ANGLE, pixel, 4);
+    if(err!=0) { return err; }
+
+    err = readLimit(limit);
+    if(err!=0) { return err; }
+
     return 0;
 }
 
@@ -249,6 +270,17 @@ int PixWriter::requestStatus(unsigned char address, unsigned char pixel, PixStat
     }
 
     status = PixStatus(moving, target, steps, angle, limit);
+    return 0;
+}
+
+int PixWriter::requestErrorCode(unsigned char address, int& errorCode) {
+    // 2 bytes (int)
+    int err = initRequest(address, REQUEST_ERROR_CODE, -1, 2);
+    if(err!=0) { return err; }
+
+    err = readInt(Wire, errorCode);
+    if(err!=0) { return err; }
+
     return 0;
 }
 
@@ -345,5 +377,5 @@ int PixWriter::toPixCode(int transmissionCode) {
     // 4 .. other twi error (lost bus arbitration, bus error, ..)
     // 5 .. timeout
 
-    return transmissionCode==0 ? 0 : ERROR_WIRE_LENGTH_TO_LONG_FOR_BUFFER + transmissionCode -1;
+    return transmissionCode==0 ? 0 : ERROR_TRANSMISSION + transmissionCode;
 }

@@ -5,18 +5,25 @@
 
 class PixWriter {
 public:
-    int init(unsigned char address, const PixLimit& limitP1, const PixLimit& limitP2, const PixLimit& limitP3, const PixLimit& limitP4);
     int home(unsigned char address);
+    int home(unsigned char address, unsigned char pixel);
+    int setLimit(unsigned char address, unsigned char pixel, const PixLimit& limit);
+    int setSteps(unsigned char address, unsigned char pixel, int steps);
+    int addSteps(unsigned char address, unsigned char pixel, int steps);
+    int setAngle(unsigned char address, unsigned char pixel, double angle);
+    int addAngle(unsigned char address, unsigned char pixel, double angle);
     int clearErrorCode(unsigned char address);
-    int setLimit(unsigned char address, unsigned char pixle, const PixLimit& limit);
-    int setSteps(unsigned char address, unsigned char pixle, int steps);
-    int addSteps(unsigned char address, unsigned char pixle, int steps);
-    int setAngle(unsigned char address, unsigned char pixle, double angle);
-    int addAngle(unsigned char address, unsigned char pixle, double angle);
     int requestPing(unsigned char address);
+    int requestPixel(unsigned char address, unsigned char &count);
+    int requestMoving(unsigned char address, unsigned char &count);
+    int requestIsMoving(unsigned char address, unsigned char pixel, bool &isMoving);
+    int requestTargetSteps(unsigned char address, unsigned char pixel, int &steps);
+    int requestSteps(unsigned char address, unsigned char pixel, int &steps);
+    int requestTargetAngle(unsigned char address, unsigned char pixel, double &angle);
+    int requestAngle(unsigned char address, unsigned char pixel, double &angle);
+    int requestLimit(unsigned char address, unsigned char pixel, PixLimit &limit);
+    int requestStatus(unsigned char address, unsigned char pixel, PixStatus& status);
     int requestErrorCode(unsigned char address, int& errorCode);
-    int requestMovingCount(unsigned char address, unsigned char& movingCount);
-    int requestStatus(unsigned char address, unsigned char pixle, PixStatus& status);
 private:
     int readLimit(PixLimit&);
     int sendRequestType(unsigned char address, unsigned char type, unsigned char pixel);

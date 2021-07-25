@@ -14,23 +14,31 @@ private:
     unsigned char requestType = REQUEST_PING;
     unsigned char requestPixel = 0;
 
-    int opInit(PixProcessor*);
     int opHome(PixProcessor*);
-    int opClearErrorCode(PixProcessor*);
+    int opHomeAll(PixProcessor*);
     int opSetLimit(PixProcessor*);
     int opSetSteps(PixProcessor*);
     int opAddSteps(PixProcessor*);
     int opSetAngle(PixProcessor*);
     int opAddAngle(PixProcessor*);
+    int opClearErrorCode(PixProcessor*);
     int opSetRequestType(PixProcessor*);
 
     int rqPing(PixProcessor*);
-    int rqErrorCode(PixProcessor*);
+    int rqPixels(PixProcessor*);
+    int rqIsMoving(PixProcessor*);
     int rqMovingCount(PixProcessor*);
+    int rqTargetSteps(PixProcessor*);
+    int rqSteps(PixProcessor*);
+    int rqTargetAngle(PixProcessor*);
+    int rqAngle(PixProcessor*);
+    int rqLimit(PixProcessor*);
     int rqStatus(PixProcessor*);
+    int rqErrorCode(PixProcessor*);
 
     int nextLimit(PixLimit&);
     int writeLimit(const PixLimit&);
+    int writeHeader(unsigned char rqCode);
 };
 
 #endif
