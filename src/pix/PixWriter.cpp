@@ -215,7 +215,7 @@ int PixWriter::requestAngle(unsigned char address, unsigned char pixel, double &
 
 int PixWriter::requestLimit(unsigned char address, unsigned char pixel, PixLimit &limit) {
     // 4 bytes = limit
-    int err = initRequest(address, REQUEST_ANGLE, pixel, 4);
+    int err = initRequest(address, REQUEST_LIMIT, pixel, 4);
     if(err!=0) { return err; }
 
     err = readLimit(limit);

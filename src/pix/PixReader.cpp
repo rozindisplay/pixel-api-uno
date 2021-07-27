@@ -337,7 +337,7 @@ int PixReader::rqLimit(PixProcessor* processor) {
     PixLimit limit = processor->requestLimit(requestPixel);
     
     // --== Header ==-- //
-    err = writeHeader(REQUEST_ANGLE);
+    err = writeHeader(REQUEST_LIMIT);
     if(0!=err) {return err;}
     
     // --== Body ==-- //
