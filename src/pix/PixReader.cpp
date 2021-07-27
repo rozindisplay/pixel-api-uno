@@ -72,11 +72,6 @@ unsigned char PixReader::getRequestType() {
 }
 
 int PixReader::opHome(PixProcessor* processor) {
-    processor->onHome();
-    return 0;
-}
-
-int PixReader::opHomeAll(PixProcessor* processor) {
     int err;
     
     char pixle;
@@ -84,6 +79,11 @@ int PixReader::opHomeAll(PixProcessor* processor) {
     if(0!=err) {return err;}
 
     processor->onHome(pixle);
+    return 0;
+}
+
+int PixReader::opHomeAll(PixProcessor* processor) {
+    processor->onHome();
     return 0;
 }
 
