@@ -7,7 +7,7 @@
 int PixWriter::home(unsigned char address) {
     Wire.beginTransmission(address);
     
-    int err = writeByte(OP_HOME, Wire);
+    int err = writeByte(OP_HOME_ALL, Wire);
     if(err!=0) {
         return err;
     }
@@ -18,7 +18,7 @@ int PixWriter::home(unsigned char address) {
 int PixWriter::home(unsigned char address, unsigned char pixel) {
     Wire.beginTransmission(address);
     
-    int err = writeByte(OP_HOME_ALL, Wire);
+    int err = writeByte(OP_HOME, Wire);
     if(err!=0) { return err; }
 
     err = writeByte(pixel, Wire);
